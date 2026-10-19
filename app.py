@@ -43,7 +43,7 @@ SOLUTION = [
 ]
 
 # =========================================================
-# KHỞI TẠO TRẠNG THÁI
+# TRẠNG THÁI ỨNG DỤNG
 # =========================================================
 
 DEFAULTS = {
@@ -65,8 +65,7 @@ for key, value in DEFAULTS.items():
 
 
 # =========================================================
-# TỆP ASSETS VÀ ÂM THANH
-# Thư mục assets nằm cạnh app.py
+# TỆP ẢNH VÀ ÂM THANH
 # =========================================================
 
 def read_asset(filename):
@@ -107,28 +106,27 @@ def show_background(filename):
     encoded = asset_b64(filename)
 
     if encoded:
-        background_css = f"""
-            background-image:
-                linear-gradient(
-                    rgba(255, 247, 249, 0.18),
-                    rgba(255, 247, 249, 0.18)
-                ),
-                url("data:image/png;base64,{encoded}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+        background = f"""
+        background-image:
+            linear-gradient(
+                rgba(255, 247, 249, 0.18),
+                rgba(255, 247, 249, 0.18)
+            ),
+            url("data:image/png;base64,{encoded}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
         """
     else:
-        background_css = """
-            background:
-                linear-gradient(135deg, #fff0f4, #f4d2df);
+        background = """
+        background: linear-gradient(135deg, #fff0f4, #f4d2df);
         """
 
     st.markdown(
         f"""
         <style>
         [data-testid="stAppViewContainer"] {{
-            {background_css}
+            {background}
         }}
         </style>
         """,
@@ -137,7 +135,7 @@ def show_background(filename):
 
 
 # =========================================================
-# ĐIỀU HƯỚNG VÀ TẠO BÀN SUDOKU
+# ĐIỀU HƯỚNG
 # =========================================================
 
 def go(page):
@@ -186,7 +184,6 @@ def has_conflict(board, r, c, value):
     for i in range(9):
         if i != c and board[r][i] == value:
             return True
-
         if i != r and board[i][c] == value:
             return True
 
@@ -195,9 +192,8 @@ def has_conflict(board, r, c, value):
 
     for rr in range(start_r, start_r + 3):
         for cc in range(start_c, start_c + 3):
-            if (rr, cc) != (r, c):
-                if board[rr][cc] == value:
-                    return True
+            if (rr, cc) != (r, c) and board[rr][cc] == value:
+                return True
 
     return False
 
@@ -211,7 +207,7 @@ def board_complete(board):
 
 
 # =========================================================
-# CSS GIAO DIỆN
+# GIAO DIỆN CSS
 # =========================================================
 
 st.markdown(
@@ -243,7 +239,7 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
-    /* TIÊU ĐỀ SUDOKU */
+    /* TIÊU ĐỀ */
     .sudoku-logo {{
         width: 100%;
         text-align: center;
@@ -251,11 +247,10 @@ st.markdown(
         font-size: clamp(2rem, 5.5vw, 5.5rem);
         line-height: 1.35;
         margin: 1rem 0;
-        white-space: normal;
         overflow-wrap: anywhere;
         text-shadow:
             0 3px 0 #f4c2d1,
-            0 8px 25px rgba(120, 22, 56, 0.24);
+            0 8px 25px rgba(120, 22, 56, .24);
         animation: logoGlow 3s ease-in-out infinite;
     }}
 
@@ -263,17 +258,16 @@ st.markdown(
         0%, 100% {{
             text-shadow:
                 0 3px 0 #f4c2d1,
-                0 8px 25px rgba(120, 22, 56, 0.24);
+                0 8px 25px rgba(120, 22, 56, .24);
         }}
         50% {{
             text-shadow:
                 0 3px 0 #f4c2d1,
-                0 0 32px rgba(198, 93, 123, 0.65);
+                0 0 32px rgba(198, 93, 123, .65);
         }}
     }}
 
     .subtitle {{
-        width: 100%;
         text-align: center;
         color: {WINE};
         font-size: 1.5rem;
@@ -281,7 +275,6 @@ st.markdown(
     }}
 
     .hint {{
-        width: 100%;
         text-align: center;
         color: {WINE};
         font-size: 1.3rem;
@@ -289,7 +282,6 @@ st.markdown(
     }}
 
     .section-title {{
-        width: 100%;
         text-align: center;
         font-size: clamp(2rem, 5vw, 4rem);
         color: {WINE};
@@ -303,11 +295,11 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    /* =====================================================
-       HOA BẤM ĐỂ VÀO CHỌN MÀN
-       CĂN GIỮA TOÀN MÀN HÌNH
-       PHÓNG TO HOA, KHÔNG PHÓNG TO CÁI Ô
-       ===================================================== */
+    /* ===================================================
+       HOA BẤM VÀO CHỌN MÀN
+       PHÓNG TO BIỂU TƯỢNG, KHÔNG PHÓNG TO KHUNG
+       CĂN GIỮA BẰNG FLEX
+       =================================================== */
 
     .st-key-flower_start {{
         width: 100% !important;
@@ -315,9 +307,9 @@ st.markdown(
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        margin: 1rem 0 !important;
-        padding: 0 !important;
         overflow: visible !important;
+        padding: 0 !important;
+        margin: 1rem 0 !important;
     }}
 
     .st-key-flower_start > div {{
@@ -328,7 +320,16 @@ st.markdown(
         overflow: visible !important;
     }}
 
-    .st-key-flower_start .st-key-flower_button {{
+    .st-key-flower_button {{
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        overflow: visible !important;
+    }}
+
+    .st-key-flower_button > div {{
         width: 100% !important;
         display: flex !important;
         justify-content: center !important;
@@ -336,30 +337,20 @@ st.markdown(
         overflow: visible !important;
     }}
 
-    .st-key-flower_start .st-key-flower_button button {{
-        font-family:
-            "Segoe UI Emoji",
-            "Apple Color Emoji",
-            "Noto Color Emoji",
-            sans-serif !important;
-
-        font-size: clamp(15rem, 28vw, 24rem) !important;
-        line-height: 1.1 !important;
-
-        width: auto !important;
+    .st-key-flower_button button {{
+        width: 100% !important;
         height: auto !important;
-        min-width: 0 !important;
         min-height: 0 !important;
-
-        padding: 0 !important;
-        margin: 0 auto !important;
+        min-width: 0 !important;
 
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
 
+        padding: 0 !important;
+        margin: 0 auto !important;
+
         background: transparent !important;
-        color: inherit !important;
         border: none !important;
         outline: none !important;
         box-shadow: none !important;
@@ -370,29 +361,33 @@ st.markdown(
         transition: transform .25s ease !important;
     }}
 
-    .st-key-flower_start .st-key-flower_button button p {{
+    /* Nhắm trực tiếp vào nội dung của nút Streamlit */
+    .st-key-flower_button button p,
+    .st-key-flower_button button span,
+    .st-key-flower_button button div {{
         font-family:
             "Segoe UI Emoji",
             "Apple Color Emoji",
             "Noto Color Emoji",
             sans-serif !important;
-        font-size: inherit !important;
+
+        font-size: clamp(15rem, 35vw, 25rem) !important;
         line-height: 1.1 !important;
-        margin: 0 !important;
         padding: 0 !important;
+        margin: 0 !important;
     }}
 
-    .st-key-flower_start .st-key-flower_button button:hover,
-    .st-key-flower_start .st-key-flower_button button:focus,
-    .st-key-flower_start .st-key-flower_button button:active {{
+    .st-key-flower_button button:hover,
+    .st-key-flower_button button:focus,
+    .st-key-flower_button button:active {{
         background: transparent !important;
         border: none !important;
         outline: none !important;
         box-shadow: none !important;
     }}
 
-    .st-key-flower_start .st-key-flower_button button:hover {{
-        transform: scale(1.05) rotate(-4deg) !important;
+    .st-key-flower_button button:hover {{
+        transform: scale(1.05) !important;
     }}
 
     /* NÚT THÔNG THƯỜNG */
@@ -499,7 +494,9 @@ st.markdown(
             font-size: clamp(1.7rem, 7vw, 3rem);
         }}
 
-        .st-key-flower_start .st-key-flower_button button {{
+        .st-key-flower_button button p,
+        .st-key-flower_button button span,
+        .st-key-flower_button button div {{
             font-size: clamp(12rem, 48vw, 19rem) !important;
         }}
 
@@ -544,7 +541,6 @@ music_data = read_asset("sounds_bgm.mp3")
 
 if music_data:
     music_encoded = base64.b64encode(music_data).decode("utf-8")
-
     autoplay = "autoplay" if st.session_state.music_on else ""
 
     st.markdown(
@@ -617,8 +613,7 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # HOA BẤM ĐỂ VÀO CHỌN MÀN
-    # Không dùng columns để tránh hoa bị lệch sang trái.
+    # NÚT HOA: GIỮ KEY KHỚP VỚI CSS Ở TRÊN
     with st.container(key="flower_start"):
         if st.button("🌸", key="flower_button"):
             go("levels")
@@ -630,7 +625,7 @@ if st.session_state.page == "menu":
 
 
 # =========================================================
-# CHỌN MÀN CHƠI
+# CHỌN MÀN
 # =========================================================
 
 elif st.session_state.page == "levels":
@@ -761,15 +756,17 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Chín khối 3×3 riêng biệt
+        # CHIA THÀNH 9 KHỐI 3×3
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
             for block_col in range(3):
                 with block_columns[block_col]:
+                    block_number = block_row * 3 + block_col + 1
+
                     st.markdown(
                         f'<div class="block-label">'
-                        f'Khối {block_row * 3 + block_col + 1}'
+                        f'Khối {block_number}'
                         f'</div>',
                         unsafe_allow_html=True,
                     )
@@ -802,10 +799,8 @@ elif st.session_state.page == "game":
                                         )
                                     else:
                                         key = f"cell_{r}_{c}"
-
                                         options = ["—"] + [
-                                            str(n)
-                                            for n in range(1, 10)
+                                            str(n) for n in range(1, 10)
                                         ]
 
                                         current = board[r][c]
@@ -835,7 +830,7 @@ elif st.session_state.page == "game":
                                                 st.session_state.board = board
                                                 st.rerun()
 
-                                            # Kiểm tra luật Sudoku và đáp án
+                                            # Sai luật hoặc sai đáp án
                                             if (
                                                 has_conflict(
                                                     board, r, c, value
