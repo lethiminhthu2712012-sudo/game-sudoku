@@ -43,7 +43,7 @@ SOLUTION = [
 ]
 
 # =========================================================
-# TRẠNG THÁI ỨNG DỤNG
+# TRẠNG THÁI
 # =========================================================
 
 DEFAULTS = {
@@ -65,7 +65,7 @@ for key, value in DEFAULTS.items():
 
 
 # =========================================================
-# TỆP ẢNH VÀ ÂM THANH
+# TỆP ASSETS
 # =========================================================
 
 def read_asset(filename):
@@ -135,7 +135,7 @@ def show_background(filename):
 
 
 # =========================================================
-# ĐIỀU HƯỚNG
+# ĐIỀU HƯỚNG VÀ SUDOKU
 # =========================================================
 
 def go(page):
@@ -146,6 +146,7 @@ def go(page):
 
 def make_puzzle(level):
     puzzle = [row[:] for row in SOLUTION]
+
     positions = [
         (r, c)
         for r in range(9)
@@ -184,6 +185,7 @@ def has_conflict(board, r, c, value):
     for i in range(9):
         if i != c and board[r][i] == value:
             return True
+
         if i != r and board[i][c] == value:
             return True
 
@@ -207,7 +209,7 @@ def board_complete(board):
 
 
 # =========================================================
-# GIAO DIỆN CSS
+# CSS GIAO DIỆN
 # =========================================================
 
 st.markdown(
@@ -239,7 +241,6 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
-    /* TIÊU ĐỀ */
     .sudoku-logo {{
         width: 100%;
         text-align: center;
@@ -295,12 +296,7 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    /* ===================================================
-       HOA BẤM VÀO CHỌN MÀN
-       PHÓNG TO BIỂU TƯỢNG, KHÔNG PHÓNG TO KHUNG
-       CĂN GIỮA BẰNG FLEX
-       =================================================== */
-
+    /* HOA TRANG CHỦ: TO VÀ CĂN GIỮA */
     .st-key-flower_start {{
         width: 100% !important;
         max-width: 100% !important;
@@ -320,17 +316,10 @@ st.markdown(
         overflow: visible !important;
     }}
 
-    .st-key-flower_button {{
-        width: 100% !important;
-        max-width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        overflow: visible !important;
-    }}
-
+    .st-key-flower_button,
     .st-key-flower_button > div {{
         width: 100% !important;
+        max-width: 100% !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -342,26 +331,20 @@ st.markdown(
         height: auto !important;
         min-height: 0 !important;
         min-width: 0 !important;
-
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-
         padding: 0 !important;
         margin: 0 auto !important;
-
         background: transparent !important;
         border: none !important;
-        outline: none !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-
         cursor: pointer !important;
         overflow: visible !important;
         transition: transform .25s ease !important;
     }}
 
-    /* Nhắm trực tiếp vào nội dung của nút Streamlit */
     .st-key-flower_button button p,
     .st-key-flower_button button span,
     .st-key-flower_button button div {{
@@ -370,7 +353,6 @@ st.markdown(
             "Apple Color Emoji",
             "Noto Color Emoji",
             sans-serif !important;
-
         font-size: clamp(15rem, 35vw, 25rem) !important;
         line-height: 1.1 !important;
         padding: 0 !important;
@@ -382,7 +364,6 @@ st.markdown(
     .st-key-flower_button button:active {{
         background: transparent !important;
         border: none !important;
-        outline: none !important;
         box-shadow: none !important;
     }}
 
@@ -390,7 +371,7 @@ st.markdown(
         transform: scale(1.05) !important;
     }}
 
-    /* NÚT THÔNG THƯỜNG */
+    /* CÁC NÚT THÔNG THƯỜNG */
     div.stButton > button {{
         background: {WINE};
         color: white !important;
@@ -413,23 +394,75 @@ st.markdown(
         text-align: center;
         color: {WINE};
         font-size: .95rem;
-        margin-bottom: .3rem;
+        margin-bottom: .5rem;
     }}
 
-    [data-testid="stSelectbox"] label {{
-        display: none;
+    /* =================================================
+       SỬA LỖI Ô SUDOKU DÍNH NHAU
+       TĂNG KHOẢNG CÁCH DỌC VÀ NGANG
+       ================================================= */
+
+    /* Tách các hàng widget theo chiều dọc */
+    [data-testid="stVerticalBlock"] {{
+        gap: 0.75rem !important;
+    }}
+
+    /* Tách riêng các ô selectbox */
+    [data-testid="stSelectbox"] {{
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+        margin-bottom: 0.45rem !important;
+        min-width: 0 !important;
+    }}
+
+    [data-testid="stSelectbox"] > div {{
+        width: 100% !important;
+    }}
+
+    [data-testid="stSelectbox"] [data-baseweb="select"] {{
+        width: 100% !important;
     }}
 
     [data-testid="stSelectbox"] [data-baseweb="select"] > div {{
-        min-height: 2.5rem;
+        min-height: 3rem !important;
         background: #fff7f9;
         border-color: #d98ca4;
-        border-radius: 8px;
+        border-radius: 9px;
     }}
 
-    [data-testid="stSelectbox"] [data-baseweb="select"] * {{
+    [data-testid="stSelectbox"] * {{
         font-family: 'Yeseva One', serif !important;
         color: {WINE};
+    }}
+
+    [data-testid="stSelectbox"] label {{
+        display: none !important;
+    }}
+
+    /* Các khối 3×3 có viền và khoảng đệm */
+    [data-testid="stVerticalBlockBorderWrapper"] {{
+        border: 1px solid rgba(120, 22, 56, .22) !important;
+        border-radius: 12px !important;
+        padding: 0.65rem !important;
+        background: rgba(255, 248, 250, .24) !important;
+        overflow: visible !important;
+    }}
+
+    /* Mỗi ô số cố định chiều cao, không đè lên nhau */
+    .sudoku-fixed-cell {{
+        min-height: 3rem;
+        height: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        background: #f3d6e0;
+        color: {WINE};
+        border: 1px solid #d98ca4;
+        border-radius: 9px;
+        font-size: 1.15rem;
+        margin-top: 0.25rem;
+        margin-bottom: 0.45rem;
     }}
 
     .status-box {{
@@ -498,6 +531,20 @@ st.markdown(
         .st-key-flower_button button span,
         .st-key-flower_button button div {{
             font-size: clamp(12rem, 48vw, 19rem) !important;
+        }}
+
+        [data-testid="stSelectbox"] [data-baseweb="select"] > div {{
+            min-height: 2.7rem !important;
+        }}
+
+        .sudoku-fixed-cell {{
+            height: 2.7rem;
+            min-height: 2.7rem;
+            font-size: 1rem;
+        }}
+
+        [data-testid="stVerticalBlockBorderWrapper"] {{
+            padding: 0.35rem !important;
         }}
 
         .st-key-toggle_music {{
@@ -613,7 +660,6 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # NÚT HOA: GIỮ KEY KHỚP VỚI CSS Ở TRÊN
     with st.container(key="flower_start"):
         if st.button("🌸", key="flower_button"):
             go("levels")
@@ -756,7 +802,8 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # CHIA THÀNH 9 KHỐI 3×3
+        # Chia bảng thành 9 khối 3×3.
+        # Mỗi khối có khoảng đệm; từng ô được tách riêng.
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -774,7 +821,10 @@ elif st.session_state.page == "game":
                     with st.container(border=True):
                         for local_r in range(3):
                             r = block_row * 3 + local_r
-                            cell_columns = st.columns(3, gap="small")
+                            cell_columns = st.columns(
+                                3,
+                                gap="small",
+                            )
 
                             for local_c in range(3):
                                 c = block_col * 3 + local_c
@@ -783,17 +833,9 @@ elif st.session_state.page == "game":
                                     if puzzle[r][c] != 0:
                                         st.markdown(
                                             f"""
-                                            <div style="
-                                                min-height:2.5rem;
-                                                display:flex;
-                                                justify-content:center;
-                                                align-items:center;
-                                                background:#f3d6e0;
-                                                color:{WINE};
-                                                border:1px solid #d98ca4;
-                                                border-radius:8px;
-                                                font-size:1.1rem;
-                                            ">{puzzle[r][c]}</div>
+                                            <div class="sudoku-fixed-cell">
+                                                {puzzle[r][c]}
+                                            </div>
                                             """,
                                             unsafe_allow_html=True,
                                         )
@@ -830,7 +872,6 @@ elif st.session_state.page == "game":
                                                 st.session_state.board = board
                                                 st.rerun()
 
-                                            # Sai luật hoặc sai đáp án
                                             if (
                                                 has_conflict(
                                                     board, r, c, value
