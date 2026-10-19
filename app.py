@@ -175,7 +175,7 @@ def is_correct_solution(board):
 
 
 # =========================================================
-# 4. TRẠNG THÁI
+# 4. KHỞI TẠO TRẠNG THÁI
 # =========================================================
 
 DEFAULTS = {
@@ -197,7 +197,7 @@ for key, value in DEFAULTS.items():
 
 
 # =========================================================
-# 5. GIAO DIỆN
+# 5. CSS GIAO DIỆN
 # =========================================================
 
 st.markdown(
@@ -234,7 +234,7 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
-    /* TIÊU ĐỀ SUDOKU VỚI KÝ TỰ TRANG TRÍ */
+    /* TIÊU ĐỀ */
     .sudoku-logo {{
         text-align: center;
         font-family: 'Yeseva One', serif !important;
@@ -283,39 +283,58 @@ st.markdown(
         margin-top: 0.5rem;
     }}
 
-    /* BÔNG HOA: CĂN GIỮA, PHÓNG TO RẤT LỚN */
+    /* BÔNG HOA: CHỈ HOA TO, KHÔNG CÓ Ô NỀN */
     div[data-testid="st-key-flower_start"] {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
         margin: 0 auto !important;
+        text-align: center !important;
+    }}
+
+    div[data-testid="st-key-flower_start"] > div {{
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
     }}
 
     div[data-testid="st-key-flower_start"] button {{
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
         background: transparent !important;
         color: #b82d58 !important;
         border: none !important;
+        outline: none !important;
         box-shadow: none !important;
-        font-size: clamp(18rem, 38vw, 36rem) !important;
+
+        display: inline-flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
         min-height: 0 !important;
         height: auto !important;
-        width: 100% !important;
+
+        font-family: 'Yeseva One', serif !important;
+        font-size: clamp(12rem, 25vw, 22rem) !important;
+        line-height: 1 !important;
+
         padding: 0 !important;
         margin: 0 auto !important;
-        line-height: 1 !important;
+
         transition: transform 0.25s ease;
     }}
 
     div[data-testid="st-key-flower_start"] button:hover {{
         background: transparent !important;
-        transform: scale(1.04) rotate(-4deg);
+        color: #b82d58 !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: scale(1.06) rotate(-5deg);
     }}
 
-    /* CÁC NÚT KHÁC GIỮ NGUYÊN MÀU */
+    /* NÚT THÔNG THƯỜNG */
     div.stButton > button {{
         background: {WINE};
         color: white !important;
@@ -334,7 +353,6 @@ st.markdown(
         transform: translateY(-2px);
     }}
 
-    /* NÚT ĐIỀU HƯỚNG */
     div[data-testid="st-key-game_levels"] button,
     div[data-testid="st-key-game_home"] button,
     div[data-testid="st-key-lost_levels"] button,
@@ -388,7 +406,7 @@ st.markdown(
         margin: 1rem 0;
     }}
 
-    /* CÁNH HOA ANH ĐÀO RƠI */
+    /* CÁNH HOA RƠI */
     .petal {{
         position: fixed;
         top: -100px;
@@ -414,6 +432,7 @@ st.markdown(
         }}
     }}
 
+    /* NHẠC NỀN */
     .music-player {{
         position: fixed;
         left: 6px;
@@ -443,11 +462,11 @@ st.markdown(
         }}
 
         .sudoku-logo {{
-            font-size: clamp(1.8rem, 7vw, 3rem);
+            font-size: clamp(1.6rem, 7vw, 3rem);
         }}
 
         div[data-testid="st-key-flower_start"] button {{
-            font-size: clamp(12rem, 45vw, 20rem) !important;
+            font-size: clamp(10rem, 45vw, 18rem) !important;
         }}
     }}
     </style>
@@ -455,7 +474,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Tạo 28 cánh hoa với vị trí và tốc độ khác nhau
+
+# =========================================================
+# 6. HIỆU ỨNG CÁNH HOA
+# =========================================================
+
 petal_html = ""
 random.seed(23)
 
@@ -477,7 +500,7 @@ st.markdown(petal_html, unsafe_allow_html=True)
 
 
 # =========================================================
-# 6. NHẠC NỀN
+# 7. NHẠC NỀN
 # =========================================================
 
 music_data = read_asset("sounds_bgm.mp3")
@@ -498,8 +521,6 @@ if music_data and st.session_state.music_on:
         unsafe_allow_html=True,
     )
 
-
-# Phát sự kiện âm thanh
 event = st.session_state.sound_event
 
 if event:
@@ -516,7 +537,7 @@ if event:
 
 
 # =========================================================
-# 7. ĐIỀU HƯỚNG
+# 8. ĐIỀU HƯỚNG
 # =========================================================
 
 def go(page):
@@ -526,7 +547,7 @@ def go(page):
 
 
 # =========================================================
-# 8. MENU CHÍNH
+# 9. MENU CHÍNH
 # =========================================================
 
 if st.session_state.page == "menu":
@@ -542,16 +563,14 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # Bông hoa duy nhất, nằm chính giữa màn hình
-    flower_left, flower_center, flower_right = st.columns([1, 5, 1])
+    # Hoa nằm chính giữa; không dùng use_container_width
+    # để tránh biến nút thành một thanh dài.
+    _, flower_center, _ = st.columns([1, 5, 1])
 
     with flower_center:
-        if st.button(
-            "🌸",
-            key="flower_start",
-            use_container_width=True,
-        ):
-            go("levels")
+        with st.container(key="flower_start"):
+            if st.button("🌸", key="flower_button"):
+                go("levels")
 
     st.markdown(
         '<div class="hint">Ấn vào bông hoa để bắt đầu</div>',
@@ -573,7 +592,7 @@ if st.session_state.page == "menu":
 
 
 # =========================================================
-# 9. CHỌN MÀN
+# 10. CHỌN MÀN
 # =========================================================
 
 elif st.session_state.page == "levels":
@@ -640,7 +659,7 @@ elif st.session_state.page == "levels":
 
 
 # =========================================================
-# 10. TRANG CHƠI
+# 11. TRANG CHƠI
 # =========================================================
 
 elif st.session_state.page == "game":
@@ -707,7 +726,7 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Chia bảng thành 9 khối, mỗi khối 3×3
+        # Chia bảng thành 9 khối 3×3
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -777,7 +796,6 @@ elif st.session_state.page == "game":
                                                 st.session_state.sound_event = None
                                                 st.rerun()
 
-                                            # Kiểm tra luật Sudoku
                                             if find_conflicts(
                                                 board, r, c, value
                                             ):
@@ -785,13 +803,11 @@ elif st.session_state.page == "game":
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Đối chiếu đáp án chính xác
                                             if value != SOLUTION[r][c]:
                                                 st.session_state.status = "lost"
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Đáp án đúng
                                             board[r][c] = value
                                             st.session_state.board = board
                                             st.session_state.sound_event = "win"
