@@ -6,7 +6,6 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-
 # =========================================================
 # 1. CẤU HÌNH
 # =========================================================
@@ -136,6 +135,7 @@ def start_level(level):
     st.session_state.status = "playing"
     st.session_state.page = "game"
     st.session_state.sound_event = "click"
+    st.session_state.celebrated = False
 
     for r in range(9):
         for c in range(9):
@@ -197,7 +197,7 @@ for key, value in DEFAULTS.items():
 
 
 # =========================================================
-# 5. GIAO DIỆN: YESEVA ONE CHO TOÀN BỘ CHỮ
+# 5. GIAO DIỆN
 # =========================================================
 
 st.markdown(
@@ -234,17 +234,19 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
+    /* TIÊU ĐỀ SUDOKU VỚI KÝ TỰ TRANG TRÍ */
     .sudoku-logo {{
         text-align: center;
         font-family: 'Yeseva One', serif !important;
-        font-size: clamp(4.5rem, 12vw, 9rem);
+        font-size: clamp(2.5rem, 6vw, 6rem);
         color: {WINE};
-        letter-spacing: 0.04em;
+        letter-spacing: 0.02em;
         text-shadow:
           0 3px 0 #f4c2d1,
           0 8px 25px rgba(120, 22, 56, 0.24);
         animation: logoGlow 3s ease-in-out infinite;
-        margin: 2rem 0 0.8rem 0;
+        margin: 1.5rem 0 0.8rem 0;
+        white-space: nowrap;
     }}
 
     @keyframes logoGlow {{
@@ -264,7 +266,7 @@ st.markdown(
         text-align: center;
         font-size: 1.5rem;
         color: {WINE};
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
     }}
 
     .section-title {{
@@ -278,35 +280,42 @@ st.markdown(
         text-align: center;
         color: {WINE};
         font-size: 1.3rem;
-        margin-top: 1rem;
+        margin-top: 0.5rem;
     }}
 
-    /* Bông hoa menu: to, không nền, không viền */
+    /* BÔNG HOA: CĂN GIỮA, PHÓNG TO RẤT LỚN */
     div[data-testid="st-key-flower_start"] {{
-        display: flex;
-        justify-content: center;
-        margin: 0 auto;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
     }}
 
     div[data-testid="st-key-flower_start"] button {{
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         background: transparent !important;
         color: #b82d58 !important;
         border: none !important;
         box-shadow: none !important;
-        font-size: clamp(7rem, 18vw, 13rem) !important;
+        font-size: clamp(18rem, 38vw, 36rem) !important;
         min-height: 0 !important;
         height: auto !important;
-        width: auto !important;
-        padding: 0.1rem 1rem !important;
-        line-height: 1.2 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        line-height: 1 !important;
         transition: transform 0.25s ease;
     }}
 
     div[data-testid="st-key-flower_start"] button:hover {{
         background: transparent !important;
-        transform: scale(1.13) rotate(-7deg);
+        transform: scale(1.04) rotate(-4deg);
     }}
 
+    /* CÁC NÚT KHÁC GIỮ NGUYÊN MÀU */
     div.stButton > button {{
         background: {WINE};
         color: white !important;
@@ -325,7 +334,7 @@ st.markdown(
         transform: translateY(-2px);
     }}
 
-    /* Điều hướng: chữ lớn khoảng gấp 3 */
+    /* NÚT ĐIỀU HƯỚNG */
     div[data-testid="st-key-game_levels"] button,
     div[data-testid="st-key-game_home"] button,
     div[data-testid="st-key-lost_levels"] button,
@@ -379,7 +388,7 @@ st.markdown(
         margin: 1rem 0;
     }}
 
-    /* Hoa anh đào lớn và nhiều hơn */
+    /* CÁNH HOA ANH ĐÀO RƠI */
     .petal {{
         position: fixed;
         top: -100px;
@@ -432,13 +441,21 @@ st.markdown(
         .music-player {{
             width: 190px;
         }}
+
+        .sudoku-logo {{
+            font-size: clamp(1.8rem, 7vw, 3rem);
+        }}
+
+        div[data-testid="st-key-flower_start"] button {{
+            font-size: clamp(12rem, 45vw, 20rem) !important;
+        }}
     }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# Tạo 28 cánh hoa lớn rơi với vị trí và tốc độ khác nhau
+# Tạo 28 cánh hoa với vị trí và tốc độ khác nhau
 petal_html = ""
 random.seed(23)
 
@@ -482,7 +499,7 @@ if music_data and st.session_state.music_on:
     )
 
 
-# Phát sự kiện âm thanh từ lượt trước
+# Phát sự kiện âm thanh
 event = st.session_state.sound_event
 
 if event:
@@ -491,6 +508,7 @@ if event:
         "lose": "sounds_lose.mp3",
         "win": "sounds_win.mp3",
     }
+
     if event in sound_files:
         play_sound(sound_files[event])
 
@@ -515,7 +533,7 @@ if st.session_state.page == "menu":
     show_background("menu.png")
 
     st.markdown(
-        '<div class="sudoku-logo">Sudoku</div>',
+        '<div class="sudoku-logo">˚₊‧꒰ა Sudoku ໒꒱ ‧₊˚</div>',
         unsafe_allow_html=True,
     )
 
@@ -524,9 +542,16 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # Không còn ảnh phía trên; chỉ có một bông hoa lớn
-    if st.button("🌸", key="flower_start"):
-        go("levels")
+    # Bông hoa duy nhất, nằm chính giữa màn hình
+    flower_left, flower_center, flower_right = st.columns([1, 5, 1])
+
+    with flower_center:
+        if st.button(
+            "🌸",
+            key="flower_start",
+            use_container_width=True,
+        ):
+            go("levels")
 
     st.markdown(
         '<div class="hint">Ấn vào bông hoa để bắt đầu</div>',
@@ -651,7 +676,6 @@ elif st.session_state.page == "game":
             go("menu")
 
     elif st.session_state.status == "won":
-        # Pháo hoa chúc mừng
         if not st.session_state.celebrated:
             st.balloons()
             st.session_state.celebrated = True
@@ -683,8 +707,7 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Không dùng thẻ div mở ở một lần gọi rồi đóng ở lần khác.
-        # Mỗi khối 3×3 dùng container riêng.
+        # Chia bảng thành 9 khối, mỗi khối 3×3
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -754,7 +777,7 @@ elif st.session_state.page == "game":
                                                 st.session_state.sound_event = None
                                                 st.rerun()
 
-                                            # Sai luật Sudoku thì thua ngay
+                                            # Kiểm tra luật Sudoku
                                             if find_conflicts(
                                                 board, r, c, value
                                             ):
@@ -762,14 +785,13 @@ elif st.session_state.page == "game":
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Đối chiếu đáp án để kiểm tra
-                                            # ngay cả khi số không bị trùng.
+                                            # Đối chiếu đáp án chính xác
                                             if value != SOLUTION[r][c]:
                                                 st.session_state.status = "lost"
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Điền đúng một ô: phát âm thanh win
+                                            # Đáp án đúng
                                             board[r][c] = value
                                             st.session_state.board = board
                                             st.session_state.sound_event = "win"
@@ -779,7 +801,9 @@ elif st.session_state.page == "game":
                                                     st.session_state.status = "won"
 
                                                     if level_index not in st.session_state.completed:
-                                                        st.session_state.completed.append(level_index)
+                                                        st.session_state.completed.append(
+                                                            level_index
+                                                        )
 
                                                     st.session_state.unlocked = max(
                                                         st.session_state.unlocked,
