@@ -6,10 +6,9 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-
-# =========================================================
+# ==================================================
 # 1. CẤU HÌNH
-# =========================================================
+# ==================================================
 
 st.set_page_config(
     page_title="Sudoku Sakura",
@@ -45,9 +44,9 @@ SOLUTION = [
 ]
 
 
-# =========================================================
-# 2. TỆP ẢNH VÀ ÂM THANH
-# =========================================================
+# ==================================================
+# 2. TỆP ASSETS
+# ==================================================
 
 def read_asset(filename):
     path = ASSETS / filename
@@ -82,16 +81,16 @@ def show_background(filename):
     encoded = asset_b64(filename)
 
     if encoded:
-        background = f"""
+        bg = f"""
         background-image:
           linear-gradient(
-            rgba(255, 247, 249, 0.25),
-            rgba(255, 247, 249, 0.25)
+            rgba(255,247,249,.25),
+            rgba(255,247,249,.25)
           ),
           url("data:image/png;base64,{encoded}");
         """
     else:
-        background = """
+        bg = """
         background: linear-gradient(135deg, #fff0f4, #f4d2df);
         """
 
@@ -99,7 +98,7 @@ def show_background(filename):
         f"""
         <style>
         [data-testid="stAppViewContainer"] {{
-            {background}
+            {bg}
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -110,18 +109,16 @@ def show_background(filename):
     )
 
 
-# =========================================================
-# 3. TẠO BÀN CỜ
-# =========================================================
+# ==================================================
+# 3. SUDOKU
+# ==================================================
 
 def make_puzzle(level):
     puzzle = [row[:] for row in SOLUTION]
     positions = [(r, c) for r in range(9) for c in range(9)]
-
     random.Random(100 + level).shuffle(positions)
 
-    blanks = 81 - LEVELS[level]["clues"]
-    for r, c in positions[:blanks]:
+    for r, c in positions[:81 - LEVELS[level]["clues"]]:
         puzzle[r][c] = 0
 
     return puzzle
@@ -133,8 +130,9 @@ def start_level(level):
     st.session_state.board = [
         row[:] for row in st.session_state.puzzle
     ]
-    st.session_state.status = "playing"
     st.session_state.page = "game"
+    st.session_state.status = "playing"
+    st.session_state.celebrated = False
     st.session_state.sound_event = "click"
 
     for r in range(9):
@@ -151,11 +149,11 @@ def find_conflicts(board, r, c, value):
         if i != r and board[i][c] == value:
             return True
 
-    start_r = (r // 3) * 3
-    start_c = (c // 3) * 3
+    br = (r // 3) * 3
+    bc = (c // 3) * 3
 
-    for rr in range(start_r, start_r + 3):
-        for cc in range(start_c, start_c + 3):
+    for rr in range(br, br + 3):
+        for cc in range(bc, bc + 3):
             if (rr, cc) != (r, c) and board[rr][cc] == value:
                 return True
 
@@ -170,15 +168,17 @@ def is_complete(board):
     )
 
 
-def is_correct_solution(board):
-    return board == SOLUTION
+def go(page):
+    st.session_state.sound_event = "click"
+    st.session_state.page = page
+    st.rerun()
 
 
-# =========================================================
-# 4. TRẠNG THÁI
-# =========================================================
+# ==================================================
+# 4. KHỞI TẠO TRẠNG THÁI
+# ==================================================
 
-DEFAULTS = {
+defaults = {
     "page": "menu",
     "level": 0,
     "unlocked": 0,
@@ -187,18 +187,17 @@ DEFAULTS = {
     "puzzle": None,
     "board": None,
     "sound_event": None,
-    "music_on": True,
     "celebrated": False,
 }
 
-for key, value in DEFAULTS.items():
+for key, value in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
 
-# =========================================================
-# 5. GIAO DIỆN: YESEVA ONE CHO TOÀN BỘ CHỮ
-# =========================================================
+# ==================================================
+# 5. CSS TOÀN TRANG
+# ==================================================
 
 st.markdown(
     f"""
@@ -236,52 +235,49 @@ st.markdown(
 
     .sudoku-logo {{
         text-align: center;
-        font-family: 'Yeseva One', serif !important;
         font-size: clamp(4.5rem, 12vw, 9rem);
         color: {WINE};
-        letter-spacing: 0.04em;
+        letter-spacing: .04em;
         text-shadow:
           0 3px 0 #f4c2d1,
-          0 8px 25px rgba(120, 22, 56, 0.24);
+          0 8px 25px rgba(120,22,56,.24);
         animation: logoGlow 3s ease-in-out infinite;
-        margin: 2rem 0 0.8rem 0;
+        margin: 1.2rem 0 .3rem;
     }}
 
     @keyframes logoGlow {{
         0%, 100% {{
-            text-shadow:
-              0 3px 0 #f4c2d1,
-              0 8px 25px rgba(120, 22, 56, 0.24);
+            text-shadow: 0 3px 0 #f4c2d1,
+                         0 8px 25px rgba(120,22,56,.24);
         }}
         50% {{
-            text-shadow:
-              0 3px 0 #f4c2d1,
-              0 0 32px rgba(198, 93, 123, 0.65);
+            text-shadow: 0 3px 0 #f4c2d1,
+                         0 0 32px rgba(198,93,123,.65);
         }}
     }}
 
     .subtitle {{
         text-align: center;
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         color: {WINE};
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }}
 
     .section-title {{
         text-align: center;
         font-size: clamp(2.2rem, 5vw, 4rem);
         color: {WINE};
-        margin: 1rem 0 1.5rem 0;
+        margin: 1rem 0 1.5rem;
     }}
 
     .hint {{
         text-align: center;
-        color: {WINE};
         font-size: 1.3rem;
-        margin-top: 1rem;
+        color: {WINE};
+        margin: .6rem 0 1.5rem;
     }}
 
-    /* Bông hoa menu: to, không nền, không viền */
+    /* Nút hoa lớn ở giữa menu */
     div[data-testid="st-key-flower_start"] {{
         display: flex;
         justify-content: center;
@@ -294,17 +290,17 @@ st.markdown(
         border: none !important;
         box-shadow: none !important;
         font-size: clamp(7rem, 18vw, 13rem) !important;
+        line-height: 1.1 !important;
         min-height: 0 !important;
         height: auto !important;
         width: auto !important;
-        padding: 0.1rem 1rem !important;
-        line-height: 1.2 !important;
-        transition: transform 0.25s ease;
+        padding: 0 !important;
+        transition: transform .25s ease;
     }}
 
     div[data-testid="st-key-flower_start"] button:hover {{
         background: transparent !important;
-        transform: scale(1.13) rotate(-7deg);
+        transform: scale(1.12) rotate(-7deg);
     }}
 
     div.stButton > button {{
@@ -314,32 +310,31 @@ st.markdown(
         border-radius: 18px;
         min-height: 3.2rem;
         font-size: 1.2rem !important;
-        padding: 0.6rem 1rem;
-        transition: 0.2s ease;
+        padding: .6rem 1rem;
+        transition: .2s ease;
     }}
 
     div.stButton > button:hover {{
         background: {ROSE};
-        border-color: {WINE};
         color: white !important;
         transform: translateY(-2px);
     }}
 
-    /* Điều hướng: chữ lớn khoảng gấp 3 */
+    /* Nút điều hướng chữ cực lớn */
     div[data-testid="st-key-game_levels"] button,
     div[data-testid="st-key-game_home"] button,
     div[data-testid="st-key-lost_levels"] button,
     div[data-testid="st-key-lost_home"] button,
-    div[data-testid="st-key-won_levels"] button {{
+    div[data-testid="st-key-won_levels"] button,
+    div[data-testid="st-key-won_home"] button {{
         font-size: clamp(1.8rem, 3.5vw, 3.4rem) !important;
         min-height: 7rem !important;
         padding: 1.2rem !important;
-        line-height: 1.3 !important;
     }}
 
     .level-note {{
         text-align: center;
-        font-size: 1.35rem;
+        font-size: 1.3rem;
         color: {WINE};
         margin-bottom: 1.5rem;
     }}
@@ -348,7 +343,7 @@ st.markdown(
         text-align: center;
         font-size: 1.1rem;
         color: {WINE};
-        margin-bottom: 0.4rem;
+        margin-bottom: .4rem;
     }}
 
     [data-testid="stSelectbox"] label {{
@@ -375,62 +370,59 @@ st.markdown(
         font-size: 1.6rem;
         border: 2px solid #e5a9bb;
         border-radius: 18px;
-        background: rgba(255, 241, 246, 0.92);
+        background: rgba(255,241,246,.92);
         margin: 1rem 0;
     }}
 
-    /* Hoa anh đào lớn và nhiều hơn */
+    /* Hoa anh đào lớn, nhiều cánh hoa */
     .petal {{
         position: fixed;
         top: -100px;
         z-index: 999;
         pointer-events: none;
         color: #e7799b;
-        opacity: 0.78;
-        font-size: 35px;
-        animation-name: petalFall;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
+        opacity: .8;
+        animation: petalFall linear infinite;
     }}
 
     @keyframes petalFall {{
         0% {{
-            transform: translate3d(0, -10vh, 0) rotate(0deg);
+            transform: translate3d(0,-10vh,0) rotate(0deg);
         }}
         50% {{
-            transform: translate3d(80px, 50vh, 0) rotate(240deg);
+            transform: translate3d(75px,50vh,0) rotate(240deg);
         }}
         100% {{
-            transform: translate3d(-45px, 115vh, 0) rotate(560deg);
+            transform: translate3d(-45px,115vh,0) rotate(560deg);
         }}
     }}
 
+    /* Trình phát nhạc cố định ở góc dưới trái */
     .music-player {{
         position: fixed;
         left: 6px;
         bottom: 6px;
-        width: 250px;
+        width: 270px;
         z-index: 10000;
         padding: 5px;
         border: 1px solid #d98ca4;
         border-radius: 14px;
-        background: rgba(255, 240, 245, 0.96);
-        box-shadow: 0 4px 15px rgba(120, 22, 56, 0.18);
+        background: rgba(255,240,245,.97);
+        box-shadow: 0 4px 15px rgba(120,22,56,.18);
     }}
 
     .music-player audio {{
         width: 100%;
-        height: 34px;
+        height: 36px;
     }}
 
     @media (max-width: 700px) {{
         .block-container {{
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
+            padding-left: .5rem;
+            padding-right: .5rem;
         }}
-
         .music-player {{
-            width: 190px;
+            width: 210px;
         }}
     }}
     </style>
@@ -438,34 +430,38 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Tạo 28 cánh hoa lớn rơi với vị trí và tốc độ khác nhau
-petal_html = ""
+
+# ==================================================
+# 6. CÁNH HOA ANH ĐÀO RƠI
+# ==================================================
+
+petals = []
 random.seed(23)
 
-for i in range(28):
+for i in range(32):
     left = random.randint(0, 98)
-    size = random.randint(24, 48)
-    duration = random.randint(9, 20)
-    delay = random.randint(0, 18)
-    symbol = random.choice(["✿", "❀", "🌸", "✾"])
+    size = random.randint(25, 48)
+    duration = random.randint(9, 21)
+    delay = random.randint(0, 20)
+    flower = random.choice(["✿", "❀", "✾", "🌸"])
 
-    petal_html += (
+    petals.append(
         f'<div class="petal" '
         f'style="left:{left}%;font-size:{size}px;'
         f'animation-duration:{duration}s;'
-        f'animation-delay:-{delay}s;">{symbol}</div>'
+        f'animation-delay:-{delay}s;">{flower}</div>'
     )
 
-st.markdown(petal_html, unsafe_allow_html=True)
+st.markdown("".join(petals), unsafe_allow_html=True)
 
 
-# =========================================================
-# 6. NHẠC NỀN
-# =========================================================
+# ==================================================
+# 7. NHẠC NỀN Ở GÓC DƯỚI BÊN TRÁI
+# ==================================================
 
 music_data = read_asset("sounds_bgm.mp3")
 
-if music_data and st.session_state.music_on:
+if music_data:
     music_encoded = base64.b64encode(music_data).decode("utf-8")
 
     st.markdown(
@@ -482,34 +478,28 @@ if music_data and st.session_state.music_on:
     )
 
 
-# Phát sự kiện âm thanh từ lượt trước
+# ==================================================
+# 8. PHÁT ÂM THANH SỰ KIỆN
+# ==================================================
+
 event = st.session_state.sound_event
 
 if event:
-    sound_files = {
+    files = {
         "click": "sounds_click.mp3",
         "lose": "sounds_lose.mp3",
         "win": "sounds_win.mp3",
     }
-    if event in sound_files:
-        play_sound(sound_files[event])
+
+    if event in files:
+        play_sound(files[event])
 
     st.session_state.sound_event = None
 
 
-# =========================================================
-# 7. ĐIỀU HƯỚNG
-# =========================================================
-
-def go(page):
-    st.session_state.sound_event = "click"
-    st.session_state.page = page
-    st.rerun()
-
-
-# =========================================================
-# 8. MENU CHÍNH
-# =========================================================
+# ==================================================
+# 9. MENU CHÍNH
+# ==================================================
 
 if st.session_state.page == "menu":
     show_background("menu.png")
@@ -524,7 +514,36 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # Không còn ảnh phía trên; chỉ có một bông hoa lớn
+    # Hình hoa anh đào ở chính giữa menu
+    flower_image = asset_b64("menu.png")
+
+    if flower_image:
+        left, middle, right = st.columns([1, 1.2, 1])
+
+        with middle:
+            st.markdown(
+                f"""
+                <div style="text-align:center;">
+                  <img
+                    src="data:image/png;base64,{flower_image}"
+                    alt="Hoa anh đào"
+                    style="
+                      width:100%;
+                      max-width:340px;
+                      max-height:300px;
+                      object-fit:contain;
+                      display:block;
+                      margin:0 auto;
+                      border:none;
+                      background:transparent;
+                      box-shadow:none;
+                    ">
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # Bông hoa lớn là nút chuyển thẳng đến chọn màn
     if st.button("🌸", key="flower_start"):
         go("levels")
 
@@ -533,23 +552,10 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    st.write("")
 
-    music_label = (
-        "♪ Tắt nhạc nền"
-        if st.session_state.music_on
-        else "♪ Bật nhạc nền"
-    )
-
-    if st.button(music_label, key="toggle_music"):
-        st.session_state.music_on = not st.session_state.music_on
-        st.session_state.sound_event = "click"
-        st.rerun()
-
-
-# =========================================================
-# 9. CHỌN MÀN
-# =========================================================
+# ==================================================
+# 10. CHỌN MÀN CHƠI
+# ==================================================
 
 elif st.session_state.page == "levels":
     show_background("menu.png")
@@ -570,9 +576,9 @@ elif st.session_state.page == "levels":
         unlocked = i <= st.session_state.unlocked
         completed = i in st.session_state.completed
 
-        col1, col2 = st.columns([3, 1])
+        left, right = st.columns([3, 1])
 
-        with col1:
+        with left:
             if completed:
                 label = f"🌸 {level['name']} · Đã hoàn thành"
             elif unlocked:
@@ -583,15 +589,15 @@ elif st.session_state.page == "levels":
             st.markdown(
                 f"""
                 <div style="
-                    color:{WINE};
-                    font-size:1.5rem;
-                    padding:0.7rem 0;
+                  color:{WINE};
+                  font-size:1.5rem;
+                  padding:.7rem 0;
                 ">{label}</div>
                 """,
                 unsafe_allow_html=True,
             )
 
-        with col2:
+        with right:
             if unlocked:
                 if st.button(
                     "Chơi ngay",
@@ -614,9 +620,9 @@ elif st.session_state.page == "levels":
         go("menu")
 
 
-# =========================================================
-# 10. TRANG CHƠI
-# =========================================================
+# ==================================================
+# 11. TRANG CHƠI
+# ==================================================
 
 elif st.session_state.page == "game":
     show_background("game_bg.png")
@@ -651,7 +657,6 @@ elif st.session_state.page == "game":
             go("menu")
 
     elif st.session_state.status == "won":
-        # Pháo hoa chúc mừng
         if not st.session_state.celebrated:
             st.balloons()
             st.session_state.celebrated = True
@@ -683,8 +688,6 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Không dùng thẻ div mở ở một lần gọi rồi đóng ở lần khác.
-        # Mỗi khối 3×3 dùng container riêng.
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -710,15 +713,15 @@ elif st.session_state.page == "game":
                                         st.markdown(
                                             f"""
                                             <div style="
-                                                min-height:2.5rem;
-                                                display:flex;
-                                                justify-content:center;
-                                                align-items:center;
-                                                background:#f3d6e0;
-                                                color:{WINE};
-                                                border:1px solid #d98ca4;
-                                                border-radius:8px;
-                                                font-size:1.15rem;
+                                              min-height:2.5rem;
+                                              display:flex;
+                                              justify-content:center;
+                                              align-items:center;
+                                              background:#f3d6e0;
+                                              color:{WINE};
+                                              border:1px solid #d98ca4;
+                                              border-radius:8px;
+                                              font-size:1.15rem;
                                             ">{puzzle[r][c]}</div>
                                             """,
                                             unsafe_allow_html=True,
@@ -730,7 +733,7 @@ elif st.session_state.page == "game":
                                         ]
 
                                         current = board[r][c]
-                                        default_index = (
+                                        index = (
                                             options.index(str(current))
                                             if current else 0
                                         )
@@ -738,23 +741,23 @@ elif st.session_state.page == "game":
                                         selected = st.selectbox(
                                             f"Ô {r + 1}-{c + 1}",
                                             options,
-                                            index=default_index,
+                                            index=index,
                                             key=key,
                                             label_visibility="collapsed",
                                         )
 
                                         value = (
                                             int(selected)
-                                            if selected != "—" else 0
+                                            if selected != "—"
+                                            else 0
                                         )
 
                                         if value != board[r][c]:
                                             if value == 0:
                                                 board[r][c] = 0
-                                                st.session_state.sound_event = None
                                                 st.rerun()
 
-                                            # Sai luật Sudoku thì thua ngay
+                                            # Kiểm tra luật Sudoku
                                             if find_conflicts(
                                                 board, r, c, value
                                             ):
@@ -762,20 +765,21 @@ elif st.session_state.page == "game":
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Đối chiếu đáp án để kiểm tra
-                                            # ngay cả khi số không bị trùng.
+                                            # Đối chiếu đáp án để phát hiện
+                                            # ngay số không đúng.
                                             if value != SOLUTION[r][c]:
                                                 st.session_state.status = "lost"
                                                 st.session_state.sound_event = "lose"
                                                 st.rerun()
 
-                                            # Điền đúng một ô: phát âm thanh win
                                             board[r][c] = value
                                             st.session_state.board = board
+
+                                            # Âm thanh đúng một ô
                                             st.session_state.sound_event = "win"
 
                                             if is_complete(board):
-                                                if is_correct_solution(board):
+                                                if board == SOLUTION:
                                                     st.session_state.status = "won"
 
                                                     if level_index not in st.session_state.completed:
@@ -797,9 +801,9 @@ elif st.session_state.page == "game":
 
         st.write("")
 
-        col_a, col_b = st.columns(2)
+        left, right = st.columns(2)
 
-        with col_a:
+        with left:
             if st.button(
                 "← Chọn màn khác",
                 key="game_levels",
@@ -807,7 +811,7 @@ elif st.session_state.page == "game":
             ):
                 go("levels")
 
-        with col_b:
+        with right:
             if st.button(
                 "⌂ Về trang chủ",
                 key="game_home",
