@@ -6,10 +6,6 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-# =========================================================
-# 1. CẤU HÌNH
-# =========================================================
-
 st.set_page_config(
     page_title="Sudoku Sakura",
     page_icon="🌸",
@@ -44,9 +40,9 @@ SOLUTION = [
 ]
 
 
-# =========================================================
-# 2. TỆP ẢNH VÀ ÂM THANH
-# =========================================================
+# ======================================================
+# TỆP ASSETS
+# ======================================================
 
 def read_asset(filename):
     path = ASSETS / filename
@@ -62,7 +58,7 @@ def asset_b64(filename):
 
 def play_sound(filename):
     data = read_asset(filename)
-    if data is None:
+    if not data:
         return
 
     encoded = base64.b64encode(data).decode("utf-8")
@@ -109,24 +105,28 @@ def show_background(filename):
     )
 
 
-# =========================================================
-# 3. TẠO BÀN CỜ
-# =========================================================
+# ======================================================
+# SUDOKU
+# ======================================================
 
 def make_puzzle(level):
     puzzle = [row[:] for row in SOLUTION]
     positions = [(r, c) for r in range(9) for c in range(9)]
-
     random.Random(100 + level).shuffle(positions)
 
-    blanks = 81 - LEVELS[level]["clues"]
-    for r, c in positions[:blanks]:
+    for r, c in positions[:81 - LEVELS[level]["clues"]]:
         puzzle[r][c] = 0
 
     return puzzle
 
 
 def start_level(level):
+    for r in range(9):
+        for c in range(9):
+            key = f"cell_{r}_{c}"
+            if key in st.session_state:
+                del st.session_state[key]
+
     st.session_state.level = level
     st.session_state.puzzle = make_puzzle(level)
     st.session_state.board = [
@@ -136,12 +136,6 @@ def start_level(level):
     st.session_state.page = "game"
     st.session_state.sound_event = "click"
     st.session_state.celebrated = False
-
-    for r in range(9):
-        for c in range(9):
-            key = f"cell_{r}_{c}"
-            if key in st.session_state:
-                del st.session_state[key]
 
 
 def find_conflicts(board, r, c, value):
@@ -170,13 +164,9 @@ def is_complete(board):
     )
 
 
-def is_correct_solution(board):
-    return board == SOLUTION
-
-
-# =========================================================
-# 4. KHỞI TẠO TRẠNG THÁI
-# =========================================================
+# ======================================================
+# TRẠNG THÁI
+# ======================================================
 
 DEFAULTS = {
     "page": "menu",
@@ -196,9 +186,9 @@ for key, value in DEFAULTS.items():
         st.session_state[key] = value
 
 
-# =========================================================
-# 5. CSS GIAO DIỆN
-# =========================================================
+# ======================================================
+# CSS
+# ======================================================
 
 st.markdown(
     f"""
@@ -234,31 +224,26 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
-    /* TIÊU ĐỀ */
     .sudoku-logo {{
         text-align: center;
-        font-family: 'Yeseva One', serif !important;
-        font-size: clamp(2.5rem, 6vw, 6rem);
+        font-size: clamp(2rem, 5.5vw, 5.5rem);
         color: {WINE};
-        letter-spacing: 0.02em;
         text-shadow:
           0 3px 0 #f4c2d1,
           0 8px 25px rgba(120, 22, 56, 0.24);
         animation: logoGlow 3s ease-in-out infinite;
-        margin: 1.5rem 0 0.8rem 0;
+        margin: 1.5rem 0 0.8rem;
         white-space: nowrap;
     }}
 
     @keyframes logoGlow {{
         0%, 100% {{
-            text-shadow:
-              0 3px 0 #f4c2d1,
-              0 8px 25px rgba(120, 22, 56, 0.24);
+            text-shadow: 0 3px 0 #f4c2d1,
+                         0 8px 25px rgba(120,22,56,.24);
         }}
         50% {{
-            text-shadow:
-              0 3px 0 #f4c2d1,
-              0 0 32px rgba(198, 93, 123, 0.65);
+            text-shadow: 0 3px 0 #f4c2d1,
+                         0 0 32px rgba(198,93,123,.65);
         }}
     }}
 
@@ -273,7 +258,7 @@ st.markdown(
         text-align: center;
         font-size: clamp(2.2rem, 5vw, 4rem);
         color: {WINE};
-        margin: 1rem 0 1.5rem 0;
+        margin: 1rem 0 1.5rem;
     }}
 
     .hint {{
@@ -283,28 +268,32 @@ st.markdown(
         margin-top: 0.5rem;
     }}
 
-    /* BÔNG HOA: CHỈ HOA TO, KHÔNG CÓ Ô NỀN */
-    div[data-testid="st-key-flower_start"] {{
+    /*
+    ====================================================
+    BÔNG HOA TRUNG TÂM
+    Chọn đúng container có key flower_start.
+    Chỉ phóng to chữ 🌸, không phóng to ô bấm.
+    ====================================================
+    */
+
+    .st-key-flower_start {{
+        width: 100% !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        width: 100% !important;
-        margin: 0 auto !important;
         text-align: center !important;
+        margin: 0 auto !important;
     }}
 
-    div[data-testid="st-key-flower_start"] > div {{
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
+    .st-key-flower_start > div {{
+        width: auto !important;
+        max-width: none !important;
+        flex: 0 0 auto !important;
     }}
 
-    div[data-testid="st-key-flower_start"] button {{
-        background: transparent !important;
-        color: #b82d58 !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
+    .st-key-flower_start button {{
+        appearance: none !important;
+        -webkit-appearance: none !important;
 
         display: inline-flex !important;
         justify-content: center !important;
@@ -313,28 +302,56 @@ st.markdown(
         width: auto !important;
         min-width: 0 !important;
         max-width: none !important;
-        min-height: 0 !important;
         height: auto !important;
-
-        font-family: 'Yeseva One', serif !important;
-        font-size: clamp(12rem, 25vw, 22rem) !important;
-        line-height: 1 !important;
+        min-height: 0 !important;
 
         padding: 0 !important;
         margin: 0 auto !important;
 
-        transition: transform 0.25s ease;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+
+        color: {WINE} !important;
+        font-family: "Segoe UI Emoji",
+                     "Apple Color Emoji",
+                     "Noto Color Emoji",
+                     sans-serif !important;
+
+        font-size: clamp(15rem, 30vw, 26rem) !important;
+        line-height: 1 !important;
+
+        transition: transform 0.25s ease !important;
+        cursor: pointer !important;
     }}
 
-    div[data-testid="st-key-flower_start"] button:hover {{
+    .st-key-flower_start button:hover,
+    .st-key-flower_start button:focus,
+    .st-key-flower_start button:active {{
         background: transparent !important;
-        color: #b82d58 !important;
         border: none !important;
         box-shadow: none !important;
-        transform: scale(1.06) rotate(-5deg);
+        outline: none !important;
     }}
 
-    /* NÚT THÔNG THƯỜNG */
+    .st-key-flower_start button:hover {{
+        transform: scale(1.06) rotate(-5deg) !important;
+    }}
+
+    /* Không để CSS nút chung làm thay đổi nút hoa */
+    .st-key-flower_start button p {{
+        font-family: "Segoe UI Emoji",
+                     "Apple Color Emoji",
+                     "Noto Color Emoji",
+                     sans-serif !important;
+        font-size: inherit !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+
+    /* CÁC NÚT THÔNG THƯỜNG */
     div.stButton > button {{
         background: {WINE};
         color: white !important;
@@ -351,17 +368,6 @@ st.markdown(
         border-color: {WINE};
         color: white !important;
         transform: translateY(-2px);
-    }}
-
-    div[data-testid="st-key-game_levels"] button,
-    div[data-testid="st-key-game_home"] button,
-    div[data-testid="st-key-lost_levels"] button,
-    div[data-testid="st-key-lost_home"] button,
-    div[data-testid="st-key-won_levels"] button {{
-        font-size: clamp(1.8rem, 3.5vw, 3.4rem) !important;
-        min-height: 7rem !important;
-        padding: 1.2rem !important;
-        line-height: 1.3 !important;
     }}
 
     .level-note {{
@@ -402,11 +408,10 @@ st.markdown(
         font-size: 1.6rem;
         border: 2px solid #e5a9bb;
         border-radius: 18px;
-        background: rgba(255, 241, 246, 0.92);
+        background: rgba(255,241,246,.92);
         margin: 1rem 0;
     }}
 
-    /* CÁNH HOA RƠI */
     .petal {{
         position: fixed;
         top: -100px;
@@ -414,7 +419,6 @@ st.markdown(
         pointer-events: none;
         color: #e7799b;
         opacity: 0.78;
-        font-size: 35px;
         animation-name: petalFall;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
@@ -422,17 +426,16 @@ st.markdown(
 
     @keyframes petalFall {{
         0% {{
-            transform: translate3d(0, -10vh, 0) rotate(0deg);
+            transform: translate3d(0,-10vh,0) rotate(0deg);
         }}
         50% {{
-            transform: translate3d(80px, 50vh, 0) rotate(240deg);
+            transform: translate3d(80px,50vh,0) rotate(240deg);
         }}
         100% {{
-            transform: translate3d(-45px, 115vh, 0) rotate(560deg);
+            transform: translate3d(-45px,115vh,0) rotate(560deg);
         }}
     }}
 
-    /* NHẠC NỀN */
     .music-player {{
         position: fixed;
         left: 6px;
@@ -442,8 +445,8 @@ st.markdown(
         padding: 5px;
         border: 1px solid #d98ca4;
         border-radius: 14px;
-        background: rgba(255, 240, 245, 0.96);
-        box-shadow: 0 4px 15px rgba(120, 22, 56, 0.18);
+        background: rgba(255,240,245,.96);
+        box-shadow: 0 4px 15px rgba(120,22,56,.18);
     }}
 
     .music-player audio {{
@@ -462,11 +465,11 @@ st.markdown(
         }}
 
         .sudoku-logo {{
-            font-size: clamp(1.6rem, 7vw, 3rem);
+            font-size: clamp(1.5rem, 7vw, 3rem);
         }}
 
-        div[data-testid="st-key-flower_start"] button {{
-            font-size: clamp(10rem, 45vw, 18rem) !important;
+        .st-key-flower_start button {{
+            font-size: clamp(12rem, 48vw, 19rem) !important;
         }}
     }}
     </style>
@@ -475,9 +478,9 @@ st.markdown(
 )
 
 
-# =========================================================
-# 6. HIỆU ỨNG CÁNH HOA
-# =========================================================
+# ======================================================
+# CÁNH HOA RƠI
+# ======================================================
 
 petal_html = ""
 random.seed(23)
@@ -499,9 +502,9 @@ for i in range(28):
 st.markdown(petal_html, unsafe_allow_html=True)
 
 
-# =========================================================
-# 7. NHẠC NỀN
-# =========================================================
+# ======================================================
+# NHẠC NỀN
+# ======================================================
 
 music_data = read_asset("sounds_bgm.mp3")
 
@@ -536,25 +539,23 @@ if event:
     st.session_state.sound_event = None
 
 
-# =========================================================
-# 8. ĐIỀU HƯỚNG
-# =========================================================
-
 def go(page):
     st.session_state.sound_event = "click"
     st.session_state.page = page
     st.rerun()
 
 
-# =========================================================
-# 9. MENU CHÍNH
-# =========================================================
+# ======================================================
+# MENU CHÍNH
+# ======================================================
 
 if st.session_state.page == "menu":
     show_background("menu.png")
 
     st.markdown(
-        '<div class="sudoku-logo">˚₊‧꒰ა Sudoku ໒꒱ ‧₊˚</div>',
+        '<div class="sudoku-logo">'
+        '˚₊‧꒰ა Sudoku ໒꒱ ‧₊˚'
+        '</div>',
         unsafe_allow_html=True,
     )
 
@@ -563,8 +564,7 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
-    # Hoa nằm chính giữa; không dùng use_container_width
-    # để tránh biến nút thành một thanh dài.
+    # Cột giữa rộng và nút hoa không kéo dài theo cột
     _, flower_center, _ = st.columns([1, 5, 1])
 
     with flower_center:
@@ -591,9 +591,9 @@ if st.session_state.page == "menu":
         st.rerun()
 
 
-# =========================================================
-# 10. CHỌN MÀN
-# =========================================================
+# ======================================================
+# CHỌN MÀN
+# ======================================================
 
 elif st.session_state.page == "levels":
     show_background("menu.png")
@@ -652,15 +652,13 @@ elif st.session_state.page == "levels":
                     use_container_width=True,
                 )
 
-    st.write("")
-
     if st.button("← Về trang chủ", key="back_menu"):
         go("menu")
 
 
-# =========================================================
-# 11. TRANG CHƠI
-# =========================================================
+# ======================================================
+# TRANG CHƠI
+# ======================================================
 
 elif st.session_state.page == "game":
     show_background("game_bg.png")
@@ -713,7 +711,6 @@ elif st.session_state.page == "game":
                 use_container_width=True,
             ):
                 start_level(level_index + 1)
-                st.session_state.celebrated = False
                 st.rerun()
 
         if st.button("← Chọn màn khác", key="won_levels"):
@@ -726,7 +723,6 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Chia bảng thành 9 khối 3×3
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -813,7 +809,7 @@ elif st.session_state.page == "game":
                                             st.session_state.sound_event = "win"
 
                                             if is_complete(board):
-                                                if is_correct_solution(board):
+                                                if board == SOLUTION:
                                                     st.session_state.status = "won"
 
                                                     if level_index not in st.session_state.completed:
