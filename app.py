@@ -696,4 +696,3 @@ elif st.session_state.page == "game":
     else:
         if st.button("🏠 Về chọn màn", use_container_width=True):
             go("levels")
-```
