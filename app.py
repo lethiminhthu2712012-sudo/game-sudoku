@@ -43,7 +43,7 @@ SOLUTION = [
 ]
 
 # =========================================================
-# TRẠNG THÁI
+# TRẠNG THÁI ỨNG DỤNG
 # =========================================================
 
 DEFAULTS = {
@@ -65,7 +65,7 @@ for key, value in DEFAULTS.items():
 
 
 # =========================================================
-# TỆP ASSETS
+# ĐỌC ASSETS
 # =========================================================
 
 def read_asset(filename):
@@ -135,7 +135,7 @@ def show_background(filename):
 
 
 # =========================================================
-# ĐIỀU HƯỚNG VÀ SUDOKU
+# ĐIỀU HƯỚNG VÀ TẠO SUDOKU
 # =========================================================
 
 def go(page):
@@ -241,6 +241,7 @@ st.markdown(
         padding-bottom: 7rem;
     }}
 
+    /* TIÊU ĐỀ TRANG CHỦ */
     .sudoku-logo {{
         width: 100%;
         text-align: center;
@@ -296,7 +297,7 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    /* HOA TRANG CHỦ: TO VÀ CĂN GIỮA */
+    /* HOA BẤM ĐỂ VÀO CHỌN MÀN */
     .st-key-flower_start {{
         width: 100% !important;
         max-width: 100% !important;
@@ -371,7 +372,7 @@ st.markdown(
         transform: scale(1.05) !important;
     }}
 
-    /* CÁC NÚT THÔNG THƯỜNG */
+    /* NÚT THÔNG THƯỜNG */
     div.stButton > button {{
         background: {WINE};
         color: white !important;
@@ -390,6 +391,19 @@ st.markdown(
         transform: translateY(-2px);
     }}
 
+    /* NÚT ĐÃ KHÓA: CHỮ MÀU HỒNG RƯỢU VANG */
+    div.stButton > button:disabled,
+    div.stButton > button:disabled p,
+    div.stButton > button:disabled span,
+    div.stButton > button:disabled div {{
+        color: {WINE} !important;
+        -webkit-text-fill-color: {WINE} !important;
+        opacity: 1 !important;
+        border-color: #d9a0b2 !important;
+        background: rgba(255, 245, 248, 0.88) !important;
+        cursor: not-allowed !important;
+    }}
+
     .block-label {{
         text-align: center;
         color: {WINE};
@@ -397,17 +411,11 @@ st.markdown(
         margin-bottom: .5rem;
     }}
 
-    /* =================================================
-       SỬA LỖI Ô SUDOKU DÍNH NHAU
-       TĂNG KHOẢNG CÁCH DỌC VÀ NGANG
-       ================================================= */
-
-    /* Tách các hàng widget theo chiều dọc */
+    /* KHOẢNG CÁCH CÁC Ô SUDOKU */
     [data-testid="stVerticalBlock"] {{
         gap: 0.75rem !important;
     }}
 
-    /* Tách riêng các ô selectbox */
     [data-testid="stSelectbox"] {{
         width: 100% !important;
         margin-top: 0.25rem !important;
@@ -439,7 +447,7 @@ st.markdown(
         display: none !important;
     }}
 
-    /* Các khối 3×3 có viền và khoảng đệm */
+    /* VIỀN RIÊNG CHO TỪNG KHỐI 3×3 */
     [data-testid="stVerticalBlockBorderWrapper"] {{
         border: 1px solid rgba(120, 22, 56, .22) !important;
         border-radius: 12px !important;
@@ -448,7 +456,7 @@ st.markdown(
         overflow: visible !important;
     }}
 
-    /* Mỗi ô số cố định chiều cao, không đè lên nhau */
+    /* Ô CHỨA SỐ CỐ ĐỊNH CHIỀU CAO */
     .sudoku-fixed-cell {{
         min-height: 3rem;
         height: 3rem;
@@ -660,6 +668,7 @@ if st.session_state.page == "menu":
         unsafe_allow_html=True,
     )
 
+    # HOA ANH ĐÀO BẤM ĐỂ VÀO CHỌN MÀN
     with st.container(key="flower_start"):
         if st.button("🌸", key="flower_button"):
             go("levels")
@@ -671,7 +680,7 @@ if st.session_state.page == "menu":
 
 
 # =========================================================
-# CHỌN MÀN
+# CHỌN MÀN CHƠI
 # =========================================================
 
 elif st.session_state.page == "levels":
@@ -802,8 +811,7 @@ elif st.session_state.page == "game":
         board = st.session_state.board
         puzzle = st.session_state.puzzle
 
-        # Chia bảng thành 9 khối 3×3.
-        # Mỗi khối có khoảng đệm; từng ô được tách riêng.
+        # BẢNG 9 KHỐI, MỖI KHỐI 3×3
         for block_row in range(3):
             block_columns = st.columns(3, gap="medium")
 
@@ -872,6 +880,7 @@ elif st.session_state.page == "game":
                                                 st.session_state.board = board
                                                 st.rerun()
 
+                                            # Kiểm tra luật Sudoku và đáp án
                                             if (
                                                 has_conflict(
                                                     board, r, c, value
